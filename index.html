@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Humble Studio MCMXCIX | 8-Bit Logic Pro EDM DAW & Portfolio</title>
+    
+    <!-- Google Retro Pixel Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome & Tailwind CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        humble: {
+                            bg: '#18191e',
+                            panel: '#22252e',
+                            panelDark: '#131418',
+                            header: '#2c2f3b',
+                            accent: '#00aaff', // Logic Pro Electric Blue
+                            cyan: '#00f0ff',
+                            green: '#00ff88',
+                            magenta: '#e600ff',
+                            yellow: '#ffcc00',
+                            red: '#ff3355',
+                            gridDark: '#15171d',
+                            gridLight: '#252936'
+                        }
+                    },
+                    fontFamily: {
+                        pixel: ['"Press Start 2P"', 'monospace'],
+                        silk: ['"Silkscreen"', 'cursive'],
+                        vt: ['"VT323"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #131418;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00aaff;
+        }
+
+        body {
+            background-color: #18191e;
+            color: #d1d5db;
+            font-family: 'Silkscreen', cursive;
+            user-select: none;
+            overflow-x: hidden;
+            image-rendering: pixelated;
+        }
+
+        /* CRT Overlay Filter */
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            ), linear-gradient(
+                90deg,
+                rgba(255, 0, 0, 0.02),
+                rgba(0, 255, 0, 0.01),
+                rgba(0, 0, 255, 0.02)
+            );
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .pixel-border {
+            box-shadow: 
+                -3px 0 0 0 #000,
+                3px 0 0 0 #000,
+                0 -3px 0 0 #000,
+                0 3px 0 0 #000,
+                -3px -3px 0 0 #000,
+                3px -3px 0 0 #000,
+                -3px 3px 0 0 #000,
+                3px 3px 0 0 #000;
+        }
+
+        .pixel-btn {
+            box-shadow: inset -2px -2px 0px 0px rgba(0,0,0,0.6), inset 2px 2px 0px 0px rgba(255,255,255,0.2);
+            transition: transform 0.05s, filter 0.1s;
+        }
+        .pixel-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: inset 2px 2px 0px 0px rgba(0,0,0,0.8);
+        }
+
+        /* Logic Pro LCD Screen Style */
+        .lcd-screen {
+            background-color: #050d1a;
+            color: #00f0ff;
+            font-family: 'VT323', monospace;
+            text-shadow: 0 0 6px rgba(0,240,255,0.8);
+            border: 2px solid #0a111d;
+        }
+
+        /* Logic Pro Horizontal Piano Roll Styles */
+        .piano-roll-container {
+            display: flex;
+            background: #111318;
+            border: 2px solid #000;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .piano-keys-col {
+            width: 75px;
+            flex-shrink: 0;
+            background: #1c1f2a;
+            border-right: 2px solid #000;
+            z-index: 10;
+        }
+
+        .piano-key-row {
+            height: 22px;
+            border-bottom: 1px solid #0e1014;
+            font-size: 8px;
+            font-family: 'Press Start 2P', monospace;
+            display: flex;
+            align-items: center;
+            padding-left: 6px;
+            box-sizing: border-box;
+        }
+
+        .piano-key-row.white-key {
+            background: #2d3242;
+            color: #e5e7eb;
+        }
+
+        .piano-key-row.black-key {
+            background: #161822;
+            color: #00aaff;
+        }
+
+        .grid-matrix-container {
+            flex-grow: 1;
+            min-width: 640px;
+            position: relative;
+            background-color: #13151c;
+        }
+
+        .grid-row {
+            height: 22px;
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            border-bottom: 1px solid #1a1d28;
+        }
+
+        .grid-cell {
+            border-right: 1px solid #202433;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.05s;
+        }
+
+        .grid-cell.beat-bar {
+            border-right: 2px solid #3d445c;
+        }
+
+        .grid-cell:hover {
+            background-color: rgba(0, 170, 255, 0.25) !important;
+        }
+
+        /* Logic Pro Horizontal Note Bar */
+        .fl-note-bar {
+            position: absolute;
+            inset: 2px 1px;
+            border-radius: 2px;
+            box-shadow: inset 1px 1px 0 rgba(255,255,255,0.4), inset -1px -1px 0 rgba(0,0,0,0.6), 0 0 6px currentColor;
+            z-index: 5;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            font-family: 'Press Start 2P', monospace;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .playhead-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #00f0ff;
+            box-shadow: 0 0 10px #00f0ff;
+            z-index: 20;
+            pointer-events: none;
+            transition: left 0.05s linear;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            background: #111;
+            height: 6px;
+            border: 1px solid #444;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 16px;
+            background: #00aaff;
+            border: 1px solid #000;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+    <!-- CRT Filter Effect -->
+    <div id="crtOverlay" class="crt-overlay"></div>
+
+    <!-- Audio Context Unlock Screen -->
+    <div id="audioStartOverlay" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
+        <div class="bg-humble-panel border-4 border-black pixel-border max-w-md w-full p-6 text-center space-y-4">
+            <div class="w-16 h-16 bg-humble-accent text-black font-pixel text-xl flex items-center justify-center mx-auto pixel-border font-bold">
+                HS
+            </div>
+            <h2 class="font-pixel text-sm text-humble-accent">HUMBLE STUDIO MCMXCIX</h2>
+            <p class="font-vt text-lg text-gray-300">PAUL ALEXANDER // LOGIC PRO RETRO EDM DAW</p>
+            <p class="text-xs font-vt text-humble-green">CLICK TO LAUNCH WEBAUDIO EDM SYNTH ENGINE</p>
+            <button onclick="unlockAudioEngine()" class="pixel-btn w-full bg-humble-green hover:bg-emerald-400 text-black font-pixel py-3 text-xs">
+                <i class="fas fa-power-off mr-2"></i> INITIALIZE_LOGIC_STUDIO
+            </button>
+        </div>
+    </div>
+
+    <!-- Header / Logic Pro Transport Bar -->
+    <header class="sticky top-0 z-40 bg-humble-header border-b-4 border-black px-3 py-2 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            
+            <!-- Branding -->
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 bg-humble-accent flex items-center justify-center text-black font-pixel text-xs font-bold pixel-border">
+                    HS
+                </div>
+                <div>
+                    <h1 class="font-pixel text-xs md:text-sm text-humble-accent tracking-wider">HUMBLE STUDIO MCMXCIX</h1>
+                    <p class="text-[10px] text-gray-400 font-vt tracking-widest hidden sm:block">PAUL ALEXANDER // LOGIC PRO 8-BIT EDM DAW & PORTFOLIO</p>
+                </div>
+            </div>
+
+            <!-- Transport Controls (Logic Pro Style) -->
+            <div class="flex items-center gap-3 bg-humble-panelDark p-1.5 rounded pixel-border border border-gray-800">
+                <button id="playBtn" onclick="togglePlay()" class="pixel-btn bg-humble-accent hover:bg-cyan-400 text-black px-3 py-1 text-xs font-pixel flex items-center gap-1">
+                    <i class="fas fa-play" id="playIcon"></i> <span id="playText">PLAY</span>
+                </button>
+
+                <button id="stopBtn" onclick="stopPlay()" class="pixel-btn bg-humble-red hover:bg-red-500 text-white px-2 py-1 text-xs font-pixel">
+                    <i class="fas fa-stop"></i>
+                </button>
+
+                <!-- Logic LCD Screen Display -->
+                <div class="lcd-screen px-3 py-0.5 rounded text-sm flex items-center gap-3">
+                    <div>BPM: <span id="bpmVal">128</span></div>
+                    <div>BAR: <span id="patDisplay">01</span></div>
+                    <div id="statusText" class="hidden sm:block text-xs opacity-80">EDM READY</div>
+                </div>
+
+                <!-- Tempo Slider -->
+                <div class="hidden lg:flex items-center gap-2 text-xs font-vt text-gray-300">
+                    <label for="bpmSlider"><i class="fas fa-tachometer-alt text-humble-cyan"></i> TEMPO</label>
+                    <input type="range" id="bpmSlider" min="60" max="200" value="128" class="w-20" oninput="updateTempo(this.value)">
+                </div>
+
+                <!-- Master Volume Slider -->
+                <div class="hidden md:flex items-center gap-2 text-xs font-vt text-gray-300">
+                    <label for="masterVol"><i class="fas fa-volume-up text-humble-green"></i> MASTER</label>
+                    <input type="range" id="masterVol" min="0" max="100" value="80" class="w-16" oninput="updateMasterVolume(this.value)">
+                </div>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div class="flex items-center gap-2 text-xs">
+                <button onclick="saveCustomPattern()" class="pixel-btn bg-gray-800 hover:bg-gray-700 text-humble-yellow border border-humble-yellow/30 px-2 py-1 text-[10px] font-pixel">
+                    <i class="fas fa-save mr-1"></i> SAVE
+                </button>
+                <button id="crtToggle" onclick="toggleCRT()" class="pixel-btn bg-gray-800 hover:bg-gray-700 text-humble-cyan border border-humble-cyan/30 px-2 py-1 text-[10px] font-pixel">
+                    CRT: ON
+                </button>
+                <a href="#contact" class="pixel-btn bg-humble-green hover:bg-emerald-400 text-black font-pixel px-2.5 py-1 text-[10px]">
+                    CONTACT
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Studio Workspace Layout -->
+    <main class="max-w-7xl mx-auto px-2 sm:px-4 mt-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- HORIZONTAL PIANO ROLL EDITOR (LOGIC PRO STYLE) -->
+        <section class="lg:col-span-12 bg-humble-panel p-3 sm:p-4 rounded border-2 border-black pixel-border">
+            
+            <!-- Top Controls & Instrument Selectors -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-700 pb-2 mb-3 gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 bg-humble-accent inline-block"></span>
+                    <h2 class="font-pixel text-xs sm:text-sm text-humble-cyan">LOGIC_PRO // HORIZONTAL PIANO ROLL EDITOR</h2>
+                </div>
+
+                <!-- EDM Preset Switcher -->
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                    <span class="font-vt text-gray-400 text-sm">EDM PRESETS:</span>
+                    <button class="pixel-btn bg-gray-800 hover:bg-gray-700 text-humble-cyan px-2 py-1 text-[10px] border border-gray-600" onclick="loadPattern('edmDrop')">EDM DROP</button>
+                    <button class="pixel-btn bg-gray-800 hover:bg-gray-700 text-humble-magenta px-2 py-1 text-[10px] border border-gray-600" onclick="loadPattern('festival')">FESTIVAL ANTHEM</button>
+                    <button class="pixel-btn bg-gray-800 hover:bg-gray-700 text-humble-yellow px-2 py-1 text-[10px] border border-gray-600" onclick="loadPattern('synthwave')">SYNTHWAVE</button>
+                    <button class="pixel-btn bg-gray-800 hover:bg-gray-700 text-humble-green px-2 py-1 text-[10px] border border-gray-600" onclick="loadPattern('futureBass')">FUTURE BASS</button>
+                    <button onclick="clearPattern()" class="pixel-btn bg-red-900/50 hover:bg-red-800 text-red-300 px-2 py-1 text-[10px] border border-red-700">CLEAR</button>
+                </div>
+            </div>
+
+            <!-- Instrument Channel Tab Selectors -->
+            <div class="flex flex-wrap items-center gap-1.5 mb-3" id="channelTabContainer">
+                <!-- Rendered Dynamically via JS -->
+            </div>
+
+            <!-- Piano Roll Header Info & Visualizer -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-3">
+                <div class="lg:col-span-3 bg-humble-panelDark p-2 border border-gray-800 rounded flex items-center justify-between">
+                    <div class="text-[11px] text-gray-300 font-vt">
+                        <i class="fas fa-mouse-pointer text-humble-accent mr-1"></i> CLICK ANY CELL TO PLACE/REMOVE LOGIC HORIZONTAL NOTE BARS // EDIT EDM SEQUENCE IN REAL-TIME
+                    </div>
+                    <div id="activeNoteDisplay" class="text-humble-green font-pixel text-xs">EDITING: CH1 ANTHEM LEAD</div>
+                </div>
+
+                <!-- Web Audio FFT Realtime Visualizer -->
+                <div class="bg-black border border-humble-cyan/40 rounded p-1 flex flex-col justify-center items-center relative overflow-hidden h-12">
+                    <canvas id="audioVisualizer" class="w-full h-full"></canvas>
+                    <div class="absolute top-1 left-2 text-[9px] font-vt text-humble-cyan opacity-80"><i class="fas fa-wave-square mr-1"></i> LOGIC SPECTRUM</div>
+                </div>
+            </div>
+
+            <!-- LOGIC PRO PIANO ROLL GRID ENGINE -->
+            <div class="piano-roll-container rounded">
+                <!-- Vertical Keys Sidebar -->
+                <div class="piano-keys-col" id="pianoKeysCol">
+                    <!-- Populated dynamically (C5 down to C3) -->
+                </div>
+
+                <!-- Matrix Column Grid (Steps 1 to 16 horizontally) -->
+                <div class="grid-matrix-container" id="gridMatrixContainer">
+                    <!-- Real-time Playhead Indicator Line -->
+                    <div id="playheadLine" class="playhead-line" style="left: 0%;"></div>
+
+                    <!-- Step Header Bar (1-16) -->
+                    <div class="grid grid-cols-16 bg-humble-panelDark border-b border-gray-800 font-vt text-[11px] text-gray-400 text-center h-5">
+                        <script>
+                            for(let i=1; i<=16; i++) {
+                                document.write(`<div class="${i%4===1?'text-humble-accent font-bold':''}">${i}</div>`);
+                            }
+                        </script>
+                    </div>
+
+                    <!-- Note Rows Container -->
+                    <div id="pianoRollRowsContainer">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- LOGIC INSPECTOR & PROFILE -->
+        <section id="profile" class="lg:col-span-5 bg-humble-panel p-4 rounded border-2 border-black pixel-border flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between border-b border-gray-700 pb-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-sliders-h text-humble-cyan"></i>
+                        <h3 class="font-pixel text-xs text-humble-cyan">INSPECTOR // PRODUCER_BIO</h3>
+                    </div>
+                    <span class="text-[10px] bg-humble-cyan/20 text-humble-cyan px-2 py-0.5 border border-humble-cyan/40">MCMXCIX</span>
+                </div>
+
+                <!-- Profile Info -->
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="relative">
+                        <img src="https://placehold.co/100x100/131418/00aaff?text=PAUL" alt="Paul Alexander" class="w-20 h-20 rounded pixel-border border-2 border-humble-accent bg-gray-900 object-cover">
+                        <div class="absolute -bottom-2 -right-2 bg-humble-accent text-black font-pixel text-[8px] px-1 py-0.5">MCMXCIX</div>
+                    </div>
+                    <div>
+                        <h4 class="font-pixel text-sm text-white">PAUL ALEXANDER</h4>
+                        <p class="text-xs text-humble-accent font-vt">MR HUMBLE MCMXCIX</p>
+                        <p class="text-[11px] text-gray-400 font-vt mt-1">DJ & Music Producer specializing in audio software development, C++ VST/AU plugins (JUCE), WebAudio API, and real-time DSP systems.</p>
+                    </div>
+                </div>
+
+                <!-- Logic Audio Mixer Skill Meters -->
+                <div class="space-y-2.5 text-xs font-vt">
+                    <div class="text-gray-300 font-pixel text-[10px] text-humble-yellow mb-1"><i class="fas fa-chart-bar mr-1"></i> TECH_STACK_EQUALIZER</div>
+                    
+                    <div>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                            <span>C++ & JUCE FRAMEWORK (VST/AU PLUGINS)</span>
+                            <span class="text-humble-green">95%</span>
+                        </div>
+                        <div class="w-full bg-gray-900 h-3 border border-gray-700 p-0.5">
+                            <div class="bg-humble-green h-full" style="width: 95%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                            <span>WEBAUDIO API & WEBASSEMBLY (WASM)</span>
+                            <span class="text-humble-cyan">92%</span>
+                        </div>
+                        <div class="w-full bg-gray-900 h-3 border border-gray-700 p-0.5">
+                            <div class="bg-humble-cyan h-full" style="width: 92%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                            <span>DSP ALGORITHMS & AUDIO SYNTHESIS</span>
+                            <span class="text-humble-accent">90%</span>
+                        </div>
+                        <div class="w-full bg-gray-900 h-3 border border-gray-700 p-0.5">
+                            <div class="bg-humble-accent h-full" style="width: 90%;"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                            <span>EDM MUSIC PRODUCTION & LOGIC PRO DAW</span>
+                            <span class="text-humble-magenta">96%</span>
+                        </div>
+                        <div class="w-full bg-gray-900 h-3 border border-gray-700 p-0.5">
+                            <div class="bg-humble-magenta h-full" style="width: 96%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-gray-800 flex flex-wrap gap-2 text-[10px]">
+                <span class="bg-gray-800 px-2 py-1 rounded text-gray-300 border border-gray-700"><i class="fas fa-map-marker-alt text-humble-red mr-1"></i> Berlin / Indonesia</span>
+                <span class="bg-gray-800 px-2 py-1 rounded text-gray-300 border border-gray-700"><i class="fas fa-headphones text-humble-green mr-1"></i> DJ & Audio Dev</span>
+            </div>
+        </section>
+
+        <!-- PLAYLIST ARRANGEMENT / AUDIO DEV PROJECTS -->
+        <section id="projects" class="lg:col-span-7 bg-humble-panel p-4 rounded border-2 border-black pixel-border">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-2 mb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-layer-group text-humble-green"></i>
+                    <h3 class="font-pixel text-xs text-humble-green">ARRANGEMENT // RELEASES & PLUGINS</h3>
+                </div>
+                <span class="text-[10px] text-gray-400 font-vt">AUDIO TIMELINE</span>
+            </div>
+
+            <!-- Playlist Blocks -->
+            <div class="space-y-3">
+                
+                <!-- Project Block 1 -->
+                <div class="bg-gray-900/60 p-3 rounded border-l-4 border-humble-accent border-r border-t border-b border-gray-800 hover:border-humble-accent transition cursor-pointer" onclick="openProjectModal('Custom JUCE Audio Plugins', 'Professional C++ VST3/AU audio plugins featuring custom DSP, wave-shaping distortion, and real-time visualizers built with the JUCE Framework.', 'C++, JUCE, DSP, VST3/AU', 'https://github.com')">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-pixel text-xs text-humble-accent">TRACK 1 // JUCE VST3/AU AUDIO PLUGINS</span>
+                        <span class="text-[9px] bg-humble-accent/20 text-humble-accent px-1.5 py-0.5 font-pixel">ACTIVE</span>
+                    </div>
+                    <p class="text-xs font-vt text-gray-300">Custom DSP synthesizers & audio effects for modern digital audio workstations.</p>
+                    <div class="mt-2 flex flex-wrap gap-2 text-[9px] font-vt text-humble-cyan">
+                        <span>#C++</span> <span>#JUCE</span> <span>#DSP</span> <span>#VST3</span> <span>#AU</span>
+                    </div>
+                </div>
+
+                <!-- Project Block 2 -->
+                <div class="bg-gray-900/60 p-3 rounded border-l-4 border-humble-green border-r border-t border-b border-gray-800 hover:border-humble-green transition cursor-pointer" onclick="openProjectModal('Interactive WebAudio Sound Tools', 'In-browser interactive audio engines, web-based EDM synthesizers, and WebAssembly audio processing tools.', 'JavaScript, WebAudio API, WebAssembly', 'https://github.com')">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-pixel text-xs text-humble-green">TRACK 2 // WEBAUDIO & WASM ENGINE</span>
+                        <span class="text-[9px] bg-humble-green/20 text-humble-green px-1.5 py-0.5 font-pixel">ACTIVE</span>
+                    </div>
+                    <p class="text-xs font-vt text-gray-300">High-performance browser audio instruments and interactive sound applications.</p>
+                    <div class="mt-2 flex flex-wrap gap-2 text-[9px] font-vt text-humble-green">
+                        <span>#WebAudioAPI</span> <span>#JavaScript</span> <span>#WebAssembly</span>
+                    </div>
+                </div>
+
+                <!-- Project Block 3 -->
+                <div class="bg-gray-900/60 p-3 rounded border-l-4 border-humble-magenta border-r border-t border-b border-gray-800 hover:border-humble-magenta transition cursor-pointer" onclick="openProjectModal('EDM Music Production & DJ Sets', 'Original EDM tracks, festival anthems, and hybrid electronic sound design produced across Berlin & Indonesia.', 'Logic Pro, Analog Synths, DSP', 'https://github.com')">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-pixel text-xs text-humble-magenta">TRACK 3 // EDM PRODUCTION & DJ SETS</span>
+                        <span class="text-[9px] bg-humble-magenta/20 text-humble-magenta px-1.5 py-0.5 font-pixel">RELEASE</span>
+                    </div>
+                    <p class="text-xs font-vt text-gray-300">Peak-time EDM anthems, energetic synth leads, and dancefloor releases.</p>
+                    <div class="mt-2 flex flex-wrap gap-2 text-[9px] font-vt text-humble-magenta">
+                        <span>#EDM</span> <span>#LogicPro</span> <span>#MusicProduction</span> <span>#DJ</span>
+                    </div>
+                </div>
+
+                <!-- Project Block 4 -->
+                <div class="bg-gray-900/60 p-3 rounded border-l-4 border-humble-yellow border-r border-t border-b border-gray-800 hover:border-humble-yellow transition cursor-pointer" onclick="openProjectModal('Real-Time DSP Algorithms', 'Research and implementation of digital filters, wavetable oscillators, and dynamic range compressors.', 'C++, Python, DSP', 'https://github.com')">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-pixel text-xs text-humble-yellow">TRACK 4 // DSP ALGORITHM RESEARCH</span>
+                        <span class="text-[9px] bg-humble-yellow/20 text-humble-yellow px-1.5 py-0.5 font-pixel">LAB</span>
+                    </div>
+                    <p class="text-xs font-vt text-gray-300">Custom filter topologies and low-latency audio processing routines.</p>
+                    <div class="mt-2 flex flex-wrap gap-2 text-[9px] font-vt text-humble-yellow">
+                        <span>#DSP</span> <span>#Filters</span> <span>#AudioMath</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SOUNDBOARD EDM SFX & TECH STACK -->
+        <section id="soundboard" class="lg:col-span-6 bg-humble-panel p-4 rounded border-2 border-black pixel-border">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-2 mb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-drum text-humble-yellow"></i>
+                    <h3 class="font-pixel text-xs text-humble-yellow">EDM_SFX_PADS & TECH_STACK</h3>
+                </div>
+                <span class="text-[10px] text-gray-400 font-vt">TRIGGERS</span>
+            </div>
+
+            <!-- SFX Pads -->
+            <p class="text-xs font-vt text-gray-400 mb-2">TRIGGER REAL-TIME EDM SYNTH FX OVER LOOP:</p>
+            <div class="grid grid-cols-4 gap-2 mb-4">
+                <button onclick="playSFX('coin')" class="pixel-btn bg-amber-600 hover:bg-amber-500 text-black py-2 text-center text-xs font-pixel rounded border border-black">
+                    <i class="fas fa-bolt block mb-1"></i> RISER
+                </button>
+                <button onclick="playSFX('jump')" class="pixel-btn bg-cyan-600 hover:bg-cyan-500 text-black py-2 text-center text-xs font-pixel rounded border border-black">
+                    <i class="fas fa-arrow-up block mb-1"></i> PLUCK
+                </button>
+                <button onclick="playSFX('laser')" class="pixel-btn bg-rose-600 hover:bg-rose-500 text-white py-2 text-center text-xs font-pixel rounded border border-black">
+                    <i class="fas fa-wave-square block mb-1"></i> LASER
+                </button>
+                <button onclick="playSFX('powerup')" class="pixel-btn bg-emerald-600 hover:bg-emerald-500 text-black py-2 text-center text-xs font-pixel rounded border border-black">
+                    <i class="fas fa-star block mb-1"></i> DROP
+                </button>
+            </div>
+
+            <!-- Tech Stack Tags -->
+            <div class="bg-humble-panelDark p-3 rounded border border-gray-800">
+                <h4 class="font-pixel text-[10px] text-gray-300 mb-2"><i class="fas fa-boxes text-humble-accent mr-1"></i> TECH_INVENTORY:</h4>
+                <div class="flex flex-wrap gap-1.5 text-xs font-vt">
+                    <span class="px-2 py-0.5 bg-gray-800 text-humble-cyan border border-gray-700">C++20</span>
+                    <span class="px-2 py-0.5 bg-gray-800 text-humble-cyan border border-gray-700">JUCE Framework</span>
+                    <span class="px-2 py-0.5 bg-gray-800 text-humble-green border border-gray-700">JavaScript ES6+</span>
+                    <span class="px-2 py-0.5 bg-gray-800 text-humble-green border border-gray-700">WebAudio API</span>
+                    <span class="px-2 py-0.5 bg-gray-800 text-humble-accent border border-gray-700">WebAssembly</span>
+                    <span class="px-2 py-0.5 bg-gray-800 text-humble-accent border border-gray-700">DSP Algorithms</span>
+                    <span class="px-2 py-0.5 bg-gray-800 text-humble-magenta border border-gray-700">Logic Pro</span>
+                    <span class="px-2 py-0.5 bg-gray-800 text-humble-magenta border border-gray-700">EDM Synthesis</span>
+                    <span class="px-2 py-0.5 bg-gray-800 text-humble-yellow border border-gray-700">VST3 / AU</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- TERMINAL / CONTACT FORM -->
+        <section id="contact" class="lg:col-span-6 bg-humble-panel p-4 rounded border-2 border-black pixel-border">
+            <div class="flex items-center justify-between border-b border-gray-700 pb-2 mb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-terminal text-humble-accent"></i>
+                    <h3 class="font-pixel text-xs text-humble-accent">TERMINAL // CONTACT_PAUL</h3>
+                </div>
+                <span class="text-[10px] text-gray-400 font-vt">TRANSMIT</span>
+            </div>
+
+            <form id="contactForm" onsubmit="handleFormSubmit(event)" class="space-y-3 font-vt text-sm">
+                <div>
+                    <label class="block text-gray-300 text-xs mb-1">NAME / ARTIST:</label>
+                    <input type="text" required placeholder="Enter your name" class="w-full bg-humble-panelDark border border-gray-700 rounded px-2.5 py-1.5 text-white focus:outline-none focus:border-humble-accent text-xs" onkeydown="playKeySound()">
+                </div>
+
+                <div>
+                    <label class="block text-gray-300 text-xs mb-1">EMAIL:</label>
+                    <input type="email" required placeholder="name@domain.com" class="w-full bg-humble-panelDark border border-gray-700 rounded px-2.5 py-1.5 text-white focus:outline-none focus:border-humble-accent text-xs" onkeydown="playKeySound()">
+                </div>
+
+                <div>
+                    <label class="block text-gray-300 text-xs mb-1">MESSAGE / AUDIO INQUIRY:</label>
+                    <textarea rows="3" required placeholder="Ask me about music production, DSP algorithms, or web audio..." class="w-full bg-humble-panelDark border border-gray-700 rounded px-2.5 py-1.5 text-white focus:outline-none focus:border-humble-accent text-xs" onkeydown="playKeySound()"></textarea>
+                </div>
+
+                <button type="submit" class="w-full pixel-btn bg-humble-accent hover:bg-cyan-500 text-black font-pixel py-2 text-xs">
+                    <i class="fas fa-paper-plane mr-1"></i> TRANSMIT_MESSAGE
+                </button>
+            </form>
+
+            <div class="mt-4 pt-3 border-t border-gray-800 flex justify-around text-center text-xs font-vt">
+                <a href="https://github.com" target="_blank" class="text-gray-400 hover:text-humble-cyan transition">
+                    <i class="fab fa-github text-base block mb-0.5"></i> GITHUB
+                </a>
+                <a href="https://soundcloud.com" target="_blank" class="text-gray-400 hover:text-humble-cyan transition">
+                    <i class="fab fa-soundcloud text-base block mb-0.5"></i> SOUNDCLOUD
+                </a>
+                <a href="mailto:mr.humble.mcmxcix@gmail.com" class="text-gray-400 hover:text-humble-cyan transition">
+                    <i class="fas fa-envelope text-base block mb-0.5"></i> EMAIL
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Project Info Modal -->
+    <div id="projectModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-humble-panel border-4 border-black pixel-border max-w-lg w-full p-4 relative">
+            <button onclick="closeProjectModal()" class="absolute top-2 right-2 text-gray-400 hover:text-white font-pixel text-xs">X</button>
+            <h3 id="modalTitle" class="font-pixel text-sm text-humble-accent mb-2">PROJECT TITLE</h3>
+            <p id="modalDesc" class="font-vt text-sm text-gray-300 mb-4">Detailed project description...</p>
+            <div class="mb-4">
+                <span class="text-xs font-vt text-gray-400">TECH STACK:</span>
+                <p id="modalTech" class="font-vt text-xs text-humble-cyan">C++, JUCE</p>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeProjectModal()" class="pixel-btn bg-gray-700 text-white font-pixel text-[10px] px-3 py-1">CLOSE</button>
+                <a id="modalLink" href="#" target="_blank" class="pixel-btn bg-humble-green text-black font-pixel text-[10px] px-3 py-1">LAUNCH_DEMO</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-humble-panel border-2 border-humble-green p-3 pixel-border text-xs font-vt text-humble-green hidden z-50">
+        <i class="fas fa-check-circle mr-1"></i> <span id="toastMsg">Action complete!</span>
+    </div>
+
+    <script>
+        let audioCtx = null;
+        let masterGain = null;
+        let analyser = null;
+        let isPlaying = false;
+        let currentStep = 0;
+        let tempo = 128;
+        let timerId = null;
+
+        // Current Selected Channel Tab to view/edit in Piano Roll
+        let activeChannelIdx = 0;
+
+        // Vertical Scale Notes for Piano Roll (C5 down to C3)
+        const noteRowKeys = [
+            'C5', 'B4', 'A#4', 'A4', 'G#4', 'G4', 'F#4', 'F4', 'E4', 'D#4', 'D4', 'C#4', 'C4',
+            'B3', 'A#3', 'A3', 'G#3', 'G3', 'F#3', 'F3', 'E3', 'D#3', 'D3', 'C#3', 'C3'
+        ];
+
+        // Note to Frequency Lookup Table
+        const noteFrequencies = {
+            'C3': 130.81, 'C#3': 138.59, 'D3': 146.83, 'D#3': 155.56, 'E3': 164.81, 'F3': 174.61, 'F#3': 185.00, 'G3': 196.00, 'G#3': 207.65, 'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
+            'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30, 'A4': 440.00, 'A#4': 466.16, 'B4': 493.88,
+            'C5': 523.25
+        };
+
+        // 6 Logic Audio Tracks for EDM Sample Sequence
+        const channels = [
+            { 
+                id: 'lead', name: 'CH1: ANTHEM LEAD', color: '#00f0ff', type: 'sawtooth', isDrum: false, mute: false, solo: false, vol: 0.85,
+                steps: [
+                    'C5', 'C5', null, 'D#5', 'F5', null, 'G5', null,
+                    'A#4', null, 'C5', null, 'G4', null, 'A#4', null
+                ]
+            },
+            { 
+                id: 'pluck', name: 'CH2: SYNTH PLUCK', color: '#e600ff', type: 'square', isDrum: false, mute: false, solo: false, vol: 0.75,
+                steps: [
+                    'C4', null, 'G4', null, 'C4', null, 'G4', null,
+                    'D#4', null, 'A#4', null, 'F4', null, 'C5', null
+                ]
+            },
+            { 
+                id: 'bass', name: 'CH3: EDM BASSLINE', color: '#ffcc00', type: 'triangle', isDrum: false, mute: false, solo: false, vol: 0.95,
+                steps: [
+                    'C3', 'C3', 'C3', 'C3', 'D#3', 'D#3', 'D#3', 'D#3',
+                    'F3', 'F3', 'F3', 'F3', 'A#3', 'A#3', 'G3', 'G3'
+                ]
+            },
+            { 
+                id: 'hat', name: 'CH4: OFFBEAT HAT', color: '#00ff88', type: 'noise', isDrum: true, mute: false, solo: false, vol: 0.65,
+                steps: [
+                    null, 'C4', null, 'C4', null, 'C4', null, 'C4',
+                    null, 'C4', null, 'C4', null, 'C4', null, 'C4'
+                ]
+            },
+            { 
+                id: 'snare', name: 'CH5: CLAP / SNARE', color: '#ff3355', type: 'noise', isDrum: true, mute: false, solo: false, vol: 0.8,
+                steps: [
+                    null, null, null, null, 'C4', null, null, null,
+                    null, null, null, null, 'C4', null, null, 'C4'
+                ]
+            },
+            { 
+                id: 'kick', name: 'CH6: 4x4 KICK DROP', color: '#00aaff', type: 'square', isDrum: true, mute: false, solo: false, vol: 1.0,
+                steps: [
+                    'C4', null, null, null, 'C4', null, null, null,
+                    'C4', null, null, null, 'C4', null, null, null
+                ]
+            }
+        ];
+
+        /* EDM Presets Definition */
+        const presets = {
+            edmDrop: [
+                ['C5', 'C5', null, 'D#5', 'F5', null, 'G5', null, 'A#4', null, 'C5', null, 'G4', null, 'A#4', null],
+                ['C4', null, 'G4', null, 'C4', null, 'G4', null, 'D#4', null, 'A#4', null, 'F4', null, 'C5', null],
+                ['C3', 'C3', 'C3', 'C3', 'D#3', 'D#3', 'D#3', 'D#3', 'F3', 'F3', 'F3', 'F3', 'A#3', 'A#3', 'G3', 'G3'],
+                [null, 'C4', null, 'C4', null, 'C4', null, 'C4', null, 'C4', null, 'C4', null, 'C4', null, 'C4'],
+                [null, null, null, null, 'C4', null, null, null, null, null, null, null, 'C4', null, null, 'C4'],
+                ['C4', null, null, null, 'C4', null, null, null, 'C4', null, null, null, 'C4', null, null, null]
+            ],
+            festival: [
+                ['G4', 'G4', 'G4', null, 'C5', 'C5', 'C5', null, 'D5', 'D5', 'D5', null, 'D#5', 'D5', 'C5', null],
+                ['G3', null, 'C4', null, 'E4', null, 'G4', null, 'C4', null, 'E4', null, 'G4', null, 'C5', null],
+                ['C3', null, 'C3', null, 'G3', null, 'G3', null, 'A3', null, 'A3', null, 'F3', null, 'F3', null],
+                ['C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4', 'C4'],
+                [null, null, null, null, 'C4', null, null, null, null, null, null, null, 'C4', null, null, null],
+                ['C4', null, null, null, 'C4', null, null, null, 'C4', null, null, null, 'C4', null, null, null]
+            ],
+            synthwave: [
+                ['C4', null, null, 'E4', null, null, 'G4', null, 'B4', null, null, 'G4', null, null, 'E4', null],
+                [null, 'G4', null, null, 'B4', null, null, 'G4', null, 'E4', null, null, 'C4', null, null, null],
+                ['C3', 'C3', null, 'C3', 'A3', 'A3', null, 'A3', 'F3', 'F3', null, 'F3', 'G3', 'G3', null, 'G3'],
+                ['C4', null, 'C4', null, 'C4', null, 'C4', null, 'C4', null, 'C4', null, 'C4', null, 'C4', null],
+                [null, null, null, null, 'C4', null, null, null, null, null, null, null, 'C4', null, null, null],
+                ['C4', null, null, null, 'C4', null, null, null, 'C4', null, null, null, 'C4', null, null, null]
+            ],
+            futureBass: [
+                ['C4', null, null, 'G4', null, null, 'D#5', null, 'D5', null, null, 'C5', null, null, 'A#4', null],
+                ['C4', 'C4', null, null, 'G4', 'G4', null, null, 'D#4', 'D#4', null, null, 'F4', 'F4', null, null],
+                ['C3', null, null, null, 'D#3', null, null, null, 'F3', null, null, null, 'A#3', null, null, null],
+                [null, 'C4', 'C4', 'C4', null, 'C4', 'C4', 'C4', null, 'C4', 'C4', 'C4', null, 'C4', 'C4', 'C4'],
+                [null, null, null, null, 'C4', null, null, null, null, null, null, null, 'C4', null, null, null],
+                ['C4', null, null, null, 'C4', null, null, null, 'C4', null, null, null, 'C4', null, null, null]
+            ]
+        };
+
+        function unlockAudioEngine() {
+            initAudio();
+            document.getElementById('audioStartOverlay').style.display = 'none';
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+
+                masterGain = audioCtx.createGain();
+                masterGain.gain.value = 0.8;
+
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 64;
+
+                masterGain.connect(analyser);
+                analyser.connect(audioCtx.destination);
+
+                startSpectrumVisualizer();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playStepSound(channelIdx, noteVal, time) {
+            if (!audioCtx || !noteVal) return;
+
+            const ch = channels[channelIdx];
+            const hasAnySolo = channels.some(c => c.solo);
+
+            if (ch.mute) return;
+            if (hasAnySolo && !ch.solo) return;
+
+            const chGain = audioCtx.createGain();
+            chGain.gain.value = ch.vol;
+            chGain.connect(masterGain);
+
+            if (!ch.isDrum) {
+                // Synthesizer Lead / Pluck / Bass
+                const freq = noteFrequencies[noteVal] || 261.63;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = ch.type;
+                osc.frequency.setValueAtTime(freq, time);
+
+                const dur = ch.id === 'pluck' ? 0.12 : ch.id === 'bass' ? 0.22 : 0.18;
+                gain.gain.setValueAtTime(0.28, time);
+                gain.gain.exponentialRampToValueAtTime(0.001, time + dur);
+
+                osc.connect(gain);
+                gain.connect(chGain);
+                osc.start(time);
+                osc.stop(time + dur);
+
+            } else {
+                // Percussion Synthesis
+                if (ch.id === 'hat') {
+                    const bufferSize = audioCtx.sampleRate * 0.04;
+                    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+                    const noise = audioCtx.createBufferSource();
+                    noise.buffer = buffer;
+
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'highpass';
+                    filter.frequency.value = 7500;
+
+                    const gain = audioCtx.createGain();
+                    gain.gain.setValueAtTime(0.14, time);
+                    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.04);
+
+                    noise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(chGain);
+                    noise.start(time);
+
+                } else if (ch.id === 'snare') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(240, time);
+                    osc.frequency.exponentialRampToValueAtTime(90, time + 0.12);
+
+                    gain.gain.setValueAtTime(0.22, time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.12);
+
+                    osc.connect(gain);
+                    gain.connect(chGain);
+                    osc.start(time);
+                    osc.stop(time + 0.12);
+
+                } else if (ch.id === 'kick') {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(170, time);
+                    osc.frequency.exponentialRampToValueAtTime(35, time + 0.1);
+
+                    gain.gain.setValueAtTime(0.4, time);
+                    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.1);
+
+                    osc.connect(gain);
+                    gain.connect(chGain);
+                    osc.start(time);
+                    osc.stop(time + 0.1);
+                }
+            }
+        }
+
+        /* Sequencer Step Loop Clock */
+        function stepScheduler() {
+            if (!isPlaying) return;
+
+            const now = audioCtx.currentTime;
+
+            channels.forEach((ch, idx) => {
+                const noteVal = ch.steps[currentStep];
+                if (noteVal) {
+                    playStepSound(idx, noteVal, now);
+                }
+            });
+
+            updatePlayheadUI(currentStep);
+
+            currentStep = (currentStep + 1) % 16;
+            const stepTime = (60 / tempo) / 4 * 1000;
+            timerId = setTimeout(stepScheduler, stepTime);
+        }
+
+        function togglePlay() {
+            initAudio();
+            isPlaying = !isPlaying;
+
+            const playIcon = document.getElementById('playIcon');
+            const playText = document.getElementById('playText');
+            const statusText = document.getElementById('statusText');
+
+            if (isPlaying) {
+                playIcon.className = 'fas fa-pause';
+                playText.textContent = 'PAUSE';
+                statusText.textContent = 'PLAYING...';
+                stepScheduler();
+            } else {
+                playIcon.className = 'fas fa-play';
+                playText.textContent = 'PLAY';
+                statusText.textContent = 'STOPPED';
+                clearTimeout(timerId);
+            }
+        }
+
+        function stopPlay() {
+            isPlaying = false;
+            clearTimeout(timerId);
+            currentStep = 0;
+            document.getElementById('playIcon').className = 'fas fa-play';
+            document.getElementById('playText').textContent = 'PLAY';
+            document.getElementById('statusText').textContent = 'STOPPED';
+            updatePlayheadUI(0);
+        }
+
+        function updateTempo(val) {
+            tempo = parseInt(val);
+            document.getElementById('bpmVal').textContent = tempo;
+        }
+
+        function updateMasterVolume(val) {
+            if (masterGain) masterGain.gain.value = parseInt(val) / 100;
+        }
+
+        function renderChannelTabs() {
+            const container = document.getElementById('channelTabContainer');
+            container.innerHTML = '';
+
+            channels.forEach((ch, idx) => {
+                const btn = document.createElement('button');
+                const isActive = idx === activeChannelIdx;
+                btn.className = `pixel-btn px-2.5 py-1 text-[10px] font-pixel rounded flex items-center gap-1.5 border ${
+                    isActive ? 'border-white font-bold' : 'border-gray-800 opacity-70 hover:opacity-100'
+                }`;
+                btn.style.backgroundColor = isActive ? ch.color : '#1a1c23';
+                btn.style.color = isActive ? '#000' : ch.color;
+
+                btn.innerHTML = `
+                    <span>${ch.name}</span>
+                    <span class="text-[8px] bg-black/40 px-1 text-white rounded">${ch.mute ? 'M' : ch.solo ? 'S' : ''}</span>
+                `;
+
+                btn.onclick = () => {
+                    activeChannelIdx = idx;
+                    renderChannelTabs();
+                    renderPianoRollGrid();
+                    document.getElementById('activeNoteDisplay').textContent = `EDITING: ${ch.name}`;
+                    document.getElementById('activeNoteDisplay').style.color = ch.color;
+                };
+
+                container.appendChild(btn);
+            });
+        }
+
+        function renderPianoRollGrid() {
+            const keysCol = document.getElementById('pianoKeysCol');
+            const rowsContainer = document.getElementById('pianoRollRowsContainer');
+
+            keysCol.innerHTML = '';
+            rowsContainer.innerHTML = '';
+
+            const currentChannel = channels[activeChannelIdx];
+
+            noteRowKeys.forEach((noteKey) => {
+                const isBlackKey = noteKey.includes('#');
+
+                // 1. Render Left Vertical Piano Key
+                const keyRow = document.createElement('div');
+                keyRow.className = `piano-key-row ${isBlackKey ? 'black-key' : 'white-key'}`;
+                keyRow.textContent = noteKey;
+                keysCol.appendChild(keyRow);
+
+                // 2. Render Horizontal Step Row Grid (Steps 1 to 16)
+                const gridRow = document.createElement('div');
+                gridRow.className = 'grid-row';
+
+                for (let sIdx = 0; sIdx < 16; sIdx++) {
+                    const cell = document.createElement('div');
+                    const isBeatBar = sIdx % 4 === 3;
+                    const isAltGroup = Math.floor(sIdx / 4) % 2 === 1;
+
+                    cell.className = `grid-cell ${isBeatBar ? 'beat-bar' : ''}`;
+                    cell.style.backgroundColor = isAltGroup ? '#15171d' : '#1f2330';
+
+                    // Check if this step has an active horizontal note bar matching noteKey
+                    if (currentChannel.steps[sIdx] === noteKey) {
+                        const noteBar = document.createElement('div');
+                        noteBar.className = 'fl-note-bar';
+                        noteBar.style.backgroundColor = currentChannel.color;
+                        noteBar.style.color = '#000';
+                        noteBar.textContent = noteKey;
+                        cell.appendChild(noteBar);
+                    }
+
+                    // Click cell to place or delete Logic note block
+                    cell.onclick = () => {
+                        initAudio();
+                        if (currentChannel.steps[sIdx] === noteKey) {
+                            currentChannel.steps[sIdx] = null; // Remove note
+                        } else {
+                            currentChannel.steps[sIdx] = noteKey; // Set note pitch
+                            playStepSound(activeChannelIdx, noteKey, audioCtx.currentTime);
+                        }
+                        renderPianoRollGrid();
+                    };
+
+                    gridRow.appendChild(cell);
+                }
+
+                rowsContainer.appendChild(gridRow);
+            });
+        }
+
+        /* Update Horizontal Playhead Position */
+        function updatePlayheadUI(step) {
+            const playhead = document.getElementById('playheadLine');
+            const stepPercent = (step / 16) * 100;
+            playhead.style.left = `${stepPercent}%`;
+        }
+
+        /* Presets & Custom Save Load */
+        function loadPattern(key) {
+            if (!presets[key]) return;
+            const pat = presets[key];
+
+            channels.forEach((ch, chIdx) => {
+                ch.steps = [...pat[chIdx]];
+            });
+
+            renderPianoRollGrid();
+            renderChannelTabs();
+            showToast(`LOADED EDM PRESET: ${key.toUpperCase()}`);
+        }
+
+        function clearPattern() {
+            channels.forEach(ch => {
+                ch.steps = new Array(16).fill(null);
+            });
+            renderPianoRollGrid();
+            showToast('PIANO ROLL CLEARED');
+        }
+
+        function saveCustomPattern() {
+            localStorage.setItem('humble_studio_piano_roll_mcmxcix', JSON.stringify(channels));
+            showToast('CUSTOM EDM PATTERN SAVED TO LOCALSTORAGE');
+        }
+
+        function startSpectrumVisualizer() {
+            const canvas = document.getElementById('audioVisualizer');
+            const ctx = canvas.getContext('2d');
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const barWidth = (canvas.width / bufferLength) * 1.5;
+                let barHeight;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    barHeight = (dataArray[i] / 255) * canvas.height;
+                    ctx.fillStyle = i % 2 === 0 ? '#00f0ff' : '#00ff88';
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 1;
+                }
+            }
+            draw();
+        }
+
+        /* SFX Soundboard Trigger */
+        function playSFX(type) {
+            initAudio();
+            const now = audioCtx.currentTime;
+
+            if (type === 'coin') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.25);
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.25);
+
+            } else if (type === 'jump') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.08);
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.2);
+
+            } else if (type === 'laser') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(1000, now);
+                osc.frequency.exponentialRampToValueAtTime(150, now + 0.15);
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.start(now);
+                osc.stop(now + 0.15);
+
+            } else if (type === 'powerup') {
+                const notes = [261, 329, 392, 523, 659, 784, 1046];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.value = freq;
+
+                    const startTime = now + (idx * 0.04);
+                    gain.gain.setValueAtTime(0.18, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.07);
+
+                    osc.connect(gain);
+                    gain.connect(masterGain);
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.07);
+                });
+            }
+        }
+
+        function playKeySound() {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(450 + Math.random() * 200, now);
+
+            gain.gain.setValueAtTime(0.03, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+            osc.connect(gain);
+            gain.connect(masterGain);
+            osc.start(now);
+            osc.stop(now + 0.03);
+        }
+
+        function toggleCRT() {
+            const overlay = document.getElementById('crtOverlay');
+            const btn = document.getElementById('crtToggle');
+            if (overlay.style.display === 'none') {
+                overlay.style.display = 'block';
+                btn.textContent = 'CRT: ON';
+            } else {
+                overlay.style.display = 'none';
+                btn.textContent = 'CRT: OFF';
+            }
+        }
+
+        function openProjectModal(title, desc, tech, link) {
+            playSFX('jump');
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalDesc').textContent = desc;
+            document.getElementById('modalTech').textContent = tech;
+            document.getElementById('modalLink').href = link;
+            document.getElementById('projectModal').classList.remove('hidden');
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.add('hidden');
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            playSFX('powerup');
+            showToast('MESSAGE TRANSMITTED TO HUMBLE STUDIO!');
+            e.target.reset();
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        window.onload = function() {
+            renderChannelTabs();
+            renderPianoRollGrid();
+        };
+    </script>
+</body>
+</html>
